@@ -10,7 +10,7 @@ const events = defineCollection({
     category: z.enum(['ctf', 'workshop', 'guest-lecture', 'hackathon']),
     description: z.string(),
     featured: z.boolean().default(false),
-    countdownTarget: z.string().nullable().optional(),
+    countdownTarget: z.union([z.string(), z.date()]).nullable().optional(),
     registrationLink: z.string().nullable().optional(),
   }),
 });
