@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allNewsletters = await getCollection('newsletters');
+const sorted = allNewsletters.sort((a, b) => b.data.issueNumber - a.data.issueNumber);
+const latest = sorted[0];
+const archive = sorted.slice(1);
+---
+
+<Layout title="Newsletter — Cyber Chakravyuh" activePage="newsletter">
+  <!-- Hero -->
+  <section class="hero-inner">
+    <div class="container">
+      <div class="section-label">CYBERPULSE</div>
+      <h1 class="hero-title">Stay Informed</h1>
+      <p class="hero-subtitle">Our newsletter covering the latest in cybersecurity and club updates</p>
+    </div>
+  </section>
+
+  {latest && (
+  <section class="section">
+    <div class="container">
+      <div class="card reveal">
+        {latest.data.image && (
+          <img src={latest.data.image} alt={latest.data.title} style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
+        )}
+        <div class="section-label">LATEST ISSUE</div>
+        <h2 class="card-title">CyberPulse — Issue #{latest.data.issueNumber}: {latest.data.title}</h2>
+        <p class="text-accent mb-24">{new Date(latest.data.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long' })}</p>
+        <p class="card-text mb-32">{latest.data.description}</p>
+        <a href={latest.data.pdfLink || '#'} class="btn btn-primary">Read Now</a>
+      </div>
+    </div>
+  </section>
+  )}
+
+  <!-- Archive -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section-header center reveal">
+        <h2 class="section-title">Archive</h2>
+      </div>
+
+      <div class="newsletter-grid">
+        {archive.map(issue => (
+          <div class="newsletter-card reveal">
+            {issue.data.image ? (
+              <div class="newsletter-card-cover" style={`background-image: url('${issue.data.image}'); background-size: cover; background-position: center; color: transparent;`}></div>
+            ) : (
+              <div class="newsletter-card-cover">#{issue.data.issueNumber}</div>
+            )}
+            <div class="newsletter-card-body">
+              <div class="newsletter-card-issue">Issue #{issue.data.issueNumber}</div>
+              <h3 class="newsletter-card-title">{issue.data.title}</h3>
+              <p class="newsletter-card-date">{new Date(issue.data.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long' })}</p>
+              <p class="newsletter-card-desc">{issue.data.description}</p>
+              <a href={issue.data.pdfLink || '#'} class="event-card-link">Read More →</a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="newsletter-cta reveal">
+        <div class="newsletter-cta-logo">📧</div>
+        <h2 class="newsletter-cta-title">Subscribe to CyberPulse</h2>
+        <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+          <input type="email" class="form-input" placeholder="Your Email Address" required />
+          <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</Layout>
