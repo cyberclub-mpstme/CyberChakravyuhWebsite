@@ -1,9 +1,9 @@
 import { config, collection, fields } from '@keystatic/core';
 
 export default config({
-  storage: process.env.NODE_ENV === 'development' ? { kind: 'local' } : { kind: 'cloud' },
-  cloud: {
-    project: 'cyber-chakravyuh/chakravyuh',
+  storage: process.env.NODE_ENV === 'development' ? { kind: 'local' } : {
+    kind: 'github',
+    repo: 'yuki-ame/CyberChakravyuhWebsite'
   },
   ui: {
     brand: { name: 'Cyber Chakravyuh Admin' },
