@@ -8,6 +8,6 @@ import vercel from '@astrojs/vercel';
 // https://astro.build/config
 export default defineConfig({
   integrations: [react(), markdoc(), keystatic()],
-  output: 'static',
+  output: 'server',
   adapter: vercel(),
 });
