@@ -4,7 +4,5 @@ import keystaticConfig from '../../../keystatic.config';
 
 export const prerender = false;
 
-const Keystatic = makePage(keystaticConfig);
+export const all = makePage(keystaticConfig);
 ---
-
-<Keystatic client:only="react" />
