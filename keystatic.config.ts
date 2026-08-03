@@ -3,7 +3,7 @@ import { config, collection, fields } from '@keystatic/core';
 export default config({
   storage: process.env.NODE_ENV === 'development' ? { kind: 'local' } : {
     kind: 'cloud',
-    project: 'yuki-ame/cyberchakravyuhwebsite'
+    project: 'yuki-ame/chakravyuh'
   },
   ui: {
     brand: { name: 'Cyber Chakravyuh Admin' },
