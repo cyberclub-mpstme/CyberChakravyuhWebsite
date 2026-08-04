@@ -7,7 +7,7 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://cyberchakravyuh.com',
+  site: 'https://www.cyberchakravyuh.in',
   integrations: [react(), markdoc(), keystatic()],
   output: 'server',
   adapter: vercel(),
