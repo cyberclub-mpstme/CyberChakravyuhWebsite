@@ -1,31 +1,28 @@
-# Astro Starter Kit: Minimal
+# Cyber Chakravyuh Official Website
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Welcome to the official repository for the **Cyber Chakravyuh** website!
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+This platform serves as the digital home for our cybersecurity committee, featuring our events, team members, legacy, and latest news.
 
-## 🚀 Project Structure
+---
 
-Inside of your Astro project, you'll see the following folders and files:
+### 👨‍💻 Developed By
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+**This project was architected, designed, and entirely developed by Yuvraj Bishnoi** for the Cyber Chakravyuh Committee.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+*All initial code commits, core layout decisions, backend architecture, and CMS integrations were authored by `yuki-ame` (Yuvraj) prior to the transfer to this official committee repository.*
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+---
 
-Any static assets, like images, can be placed in the `public/` directory.
+## 🚀 Tech Stack
 
-## 🧞 Commands
+This project was built with a modern, high-performance web stack:
+- **Framework:** [Astro 5](https://astro.build) (for blazingly fast, server-rendered pages)
+- **CMS:** [Keystatic](https://keystatic.com/) (Headless Git-based CMS for managing Events, Team, etc.)
+- **Styling:** Vanilla CSS with custom design tokens for a dynamic, cyberpunk aesthetic
+- **Hosting:** [Vercel](https://vercel.com)
+
+## 🧞 Local Development
 
 All commands are run from the root of the project, from a terminal:
 
@@ -34,10 +31,6 @@ All commands are run from the root of the project, from a terminal:
 | `npm install`             | Installs dependencies                            |
 | `npm run dev`             | Starts local dev server at `localhost:4321`      |
 | `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### Editing Content Locally
+When running the development server (`npm run dev`), you can visit `http://localhost:4321/keystatic` to open the local Keystatic Admin panel. Any changes made here will instantly be saved to the `src/content/` folder on your hard drive!
