@@ -28,17 +28,17 @@ const totalEditions = sorted.length;
     <div class="container">
       <div class="zd-stats-row">
         <div class="zd-stat">
-          <span class="zd-stat-number" data-count={totalEditions} data-suffix="">{totalEditions}</span>
+          <span class="zd-stat-number">{totalEditions}</span>
           <span class="zd-stat-label">Editions Published</span>
         </div>
         <div class="zd-stat-divider"></div>
         <div class="zd-stat">
-          <span class="zd-stat-number" data-count={totalViews} data-suffix="">{totalViews}</span>
+          <span class="zd-stat-number">{totalViews}</span>
           <span class="zd-stat-label">Total Views</span>
         </div>
         <div class="zd-stat-divider"></div>
         <div class="zd-stat">
-          <span class="zd-stat-number" data-count={totalDownloads} data-suffix="">{totalDownloads}</span>
+          <span class="zd-stat-number">{totalDownloads}</span>
           <span class="zd-stat-label">Total Downloads</span>
         </div>
       </div>
@@ -186,9 +186,7 @@ const totalEditions = sorted.length;
     const statNums = document.querySelectorAll('.zd-stat-number');
     if (statNums.length >= 3) {
       statNums[1].textContent = totalViews;
-      statNums[1].dataset.count = totalViews;
       statNums[2].textContent = totalDownloads;
-      statNums[2].dataset.count = totalDownloads;
     }
 
     // Helper to increment total stat visually
@@ -196,7 +194,6 @@ const totalEditions = sorted.length;
       if (statNums.length > index) {
         const newVal = parseInt(statNums[index].textContent || '0') + 1;
         statNums[index].textContent = newVal;
-        statNums[index].dataset.count = newVal;
       }
     };
 
