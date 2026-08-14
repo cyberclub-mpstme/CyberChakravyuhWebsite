@@ -16,14 +16,16 @@ const events = defineCollection({
 });
 
 const newsletters = defineCollection({
-  loader: glob({ pattern: '**/*.mdoc', base: './src/content/newsletters' }),
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/newsletters' }),
   schema: z.object({
     title: z.string(),
-    image: z.string().nullable().optional(),
+    coverImage: z.string().nullable().optional(),
     issueNumber: z.number(),
     date: z.union([z.string(), z.date()]),
     description: z.string(),
-    pdfLink: z.string().nullable().optional(),
+    pdfFile: z.string().nullable().optional(),
+    downloads: z.number().default(0),
+    views: z.number().default(0),
   }),
 });
 

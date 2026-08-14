@@ -76,22 +76,22 @@ const totalEditions = sorted.length;
               <div class="zd-edition-meta">
                 <span class="zd-edition-meta-item">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  {issue.data.views || 0} views
+                  <span class="zd-view-count" data-edition={issue.id}>0</span> views
                 </span>
                 <span class="zd-edition-meta-item">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  {issue.data.downloads || 0} downloads
+                  <span class="zd-dl-count" data-edition={issue.id}>0</span> downloads
                 </span>
               </div>
               <div class="zd-edition-actions">
                 {issue.data.pdfFile && (
-                  <a href={`/newsletter/read/${issue.slug}`} class="btn btn-primary zd-btn">
+                  <a href={issue.data.pdfFile} target="_blank" rel="noopener noreferrer" class="btn btn-primary zd-btn zd-read-btn" data-edition={issue.id}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                     Read Now
                   </a>
                 )}
                 {issue.data.pdfFile && (
-                  <a href={issue.data.pdfFile} download class="btn btn-outline zd-btn">
+                  <a href={issue.data.pdfFile} download class="btn btn-outline zd-btn zd-download-btn" data-edition={issue.id}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Download PDF
                   </a>
@@ -127,5 +127,79 @@ const totalEditions = sorted.length;
       </div>
     </div>
   </section>
+
+<script is:inline>
+(function() {
+  const NAMESPACE = 'cyberchakravyuh-zeroday';
+
+  // CountAPI helper — hit (increment) or get
+  async function countHit(key) {
+    try {
+      const res = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${key}`);
+      if (res.ok) { const d = await res.json(); return d.value; }
+    } catch(e) {}
+    // Fallback: localStorage
+    const k = `zd-${key}`;
+    const v = parseInt(localStorage.getItem(k) || '0') + 1;
+    localStorage.setItem(k, v);
+    return v;
+  }
+
+  async function countGet(key) {
+    try {
+      const res = await fetch(`https://api.countapi.xyz/get/${NAMESPACE}/${key}`);
+      if (res.ok) { const d = await res.json(); return d.value || 0; }
+    } catch(e) {}
+    return parseInt(localStorage.getItem(`zd-${key}`) || '0');
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Load current counts for all editions
+    const viewEls = document.querySelectorAll('.zd-view-count');
+    const dlEls = document.querySelectorAll('.zd-dl-count');
+    let totalViews = 0, totalDownloads = 0;
+
+    for (const el of viewEls) {
+      const ed = el.dataset.edition;
+      const count = await countGet(`views-${ed}`);
+      el.textContent = count;
+      totalViews += count;
+    }
+    for (const el of dlEls) {
+      const ed = el.dataset.edition;
+      const count = await countGet(`downloads-${ed}`);
+      el.textContent = count;
+      totalDownloads += count;
+    }
+
+    // Update stats bar totals
+    const statNums = document.querySelectorAll('.zd-stat-number');
+    if (statNums.length >= 3) {
+      statNums[1].textContent = totalViews;
+      statNums[2].textContent = totalDownloads;
+    }
+
+    // Read Now click → increment views
+    document.querySelectorAll('.zd-read-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const ed = btn.dataset.edition;
+        const newCount = await countHit(`views-${ed}`);
+        const el = document.querySelector(`.zd-view-count[data-edition="${ed}"]`);
+        if (el) el.textContent = newCount;
+      });
+    });
+
+    // Download click → increment downloads
+    document.querySelectorAll('.zd-download-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const ed = btn.dataset.edition;
+        const newCount = await countHit(`downloads-${ed}`);
+        const el = document.querySelector(`.zd-dl-count[data-edition="${ed}"]`);
+        if (el) el.textContent = newCount;
+      });
+    });
+  });
+})();
+</script>
 
 </Layout>
