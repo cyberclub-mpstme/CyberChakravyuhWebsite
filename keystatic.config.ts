@@ -43,19 +43,20 @@ export default config({
       label: 'Newsletters',
       slugField: 'title',
       path: 'src/content/newsletters/*',
-      format: { contentField: 'content' },
+      format: { data: 'yaml' },
       schema: {
-        title: fields.slug({ name: { label: 'Title' } }),
-        image: fields.image({
-          label: 'Cover Image',
+        title: fields.slug({ name: { label: 'Edition Title' } }),
+        coverImage: fields.image({
+          label: 'Cover Page Image',
           directory: 'public/images/newsletters',
           publicPath: '/images/newsletters/',
         }),
-        issueNumber: fields.integer({ label: 'Issue Number', validation: { isRequired: true } }),
+        issueNumber: fields.integer({ label: 'Edition Number', validation: { isRequired: true } }),
         date: fields.date({ label: 'Publish Date', validation: { isRequired: true } }),
         description: fields.text({ label: 'Short Description', multiline: true }),
-        pdfLink: fields.url({ label: 'PDF Link (optional)' }),
-        content: fields.markdoc({ label: 'Content', options: { image: false } }),
+        pdfFile: fields.text({ label: 'PDF File Path (e.g. /newsletters/zero-day-edition-1.pdf)' }),
+        downloads: fields.integer({ label: 'Download Count', defaultValue: 0 }),
+        views: fields.integer({ label: 'View Count', defaultValue: 0 }),
       },
     }),
 
