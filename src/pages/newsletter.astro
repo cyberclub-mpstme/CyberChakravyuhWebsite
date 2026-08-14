@@ -130,30 +130,40 @@ const totalEditions = sorted.length;
 
 <script is:inline>
 (function() {
-  const NAMESPACE = 'cyberchakravyuh-zeroday';
+  // Use our new local API route
+  async function countHit(type, edition) {
+    // Prevent duplicate counting on the same device
+    const localKey = `zd_tracked_${type}_${edition}`;
+    if (localStorage.getItem(localKey)) {
+      // Already tracked this type for this edition!
+      // We don't hit the API to save requests and keep numbers genuine.
+      return null;
+    }
 
-  // CountAPI helper — hit (increment) or get
-  async function countHit(key) {
     try {
-      const res = await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${key}`);
-      if (res.ok) { const d = await res.json(); return d.value; }
+      const res = await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, edition })
+      });
+      if (res.ok) { 
+        const d = await res.json(); 
+        // Mark as tracked so we don't count them again!
+        localStorage.setItem(localKey, 'true');
+        return d.value; 
+      }
     } catch(e) {}
-    // Fallback: localStorage
-    const k = `zd-${key}`;
-    const v = parseInt(localStorage.getItem(k) || '0') + 1;
-    localStorage.setItem(k, v);
-    return v;
-  }
-
-  async function countGet(key) {
-    try {
-      const res = await fetch(`https://api.countapi.xyz/get/${NAMESPACE}/${key}`);
-      if (res.ok) { const d = await res.json(); return d.value || 0; }
-    } catch(e) {}
-    return parseInt(localStorage.getItem(`zd-${key}`) || '0');
+    return null;
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Fetch all stats at once from our database
+    let globalStats = {};
+    try {
+      const res = await fetch('/api/stats');
+      if (res.ok) { globalStats = await res.json(); }
+    } catch(e) {}
+
     // Load current counts for all editions
     const viewEls = document.querySelectorAll('.zd-view-count');
     const dlEls = document.querySelectorAll('.zd-dl-count');
@@ -161,13 +171,13 @@ const totalEditions = sorted.length;
 
     for (const el of viewEls) {
       const ed = el.dataset.edition;
-      const count = await countGet(`views-${ed}`);
+      const count = parseInt(globalStats[`zd-views-${ed}`] || '0');
       el.textContent = count;
       totalViews += count;
     }
     for (const el of dlEls) {
       const ed = el.dataset.edition;
-      const count = await countGet(`downloads-${ed}`);
+      const count = parseInt(globalStats[`zd-downloads-${ed}`] || '0');
       el.textContent = count;
       totalDownloads += count;
     }
@@ -181,7 +191,6 @@ const totalEditions = sorted.length;
 
     // Helper to increment total stat visually
     const incrementTotal = (index) => {
-      const statNums = document.querySelectorAll('.zd-stat-number');
       if (statNums.length > index) {
         statNums[index].textContent = parseInt(statNums[index].textContent || '0') + 1;
       }
@@ -191,10 +200,12 @@ const totalEditions = sorted.length;
     document.querySelectorAll('.zd-read-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const ed = btn.dataset.edition;
-        const newCount = await countHit(`views-${ed}`);
-        const el = document.querySelector(`.zd-view-count[data-edition="${ed}"]`);
-        if (el) el.textContent = newCount;
-        incrementTotal(1); // Index 1 is total views
+        const newCount = await countHit('views', ed);
+        if (newCount !== null) {
+          const el = document.querySelector(`.zd-view-count[data-edition="${ed}"]`);
+          if (el) el.textContent = newCount;
+          incrementTotal(1); // Index 1 is total views
+        }
       });
     });
 
@@ -202,10 +213,12 @@ const totalEditions = sorted.length;
     document.querySelectorAll('.zd-download-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const ed = btn.dataset.edition;
-        const newCount = await countHit(`downloads-${ed}`);
-        const el = document.querySelector(`.zd-dl-count[data-edition="${ed}"]`);
-        if (el) el.textContent = newCount;
-        incrementTotal(2); // Index 2 is total downloads
+        const newCount = await countHit('downloads', ed);
+        if (newCount !== null) {
+          const el = document.querySelector(`.zd-dl-count[data-edition="${ed}"]`);
+          if (el) el.textContent = newCount;
+          incrementTotal(2); // Index 2 is total downloads
+        }
       });
     });
   });
