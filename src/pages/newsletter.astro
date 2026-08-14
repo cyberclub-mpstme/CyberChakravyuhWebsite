@@ -186,13 +186,17 @@ const totalEditions = sorted.length;
     const statNums = document.querySelectorAll('.zd-stat-number');
     if (statNums.length >= 3) {
       statNums[1].textContent = totalViews;
+      statNums[1].dataset.count = totalViews;
       statNums[2].textContent = totalDownloads;
+      statNums[2].dataset.count = totalDownloads;
     }
 
     // Helper to increment total stat visually
     const incrementTotal = (index) => {
       if (statNums.length > index) {
-        statNums[index].textContent = parseInt(statNums[index].textContent || '0') + 1;
+        const newVal = parseInt(statNums[index].textContent || '0') + 1;
+        statNums[index].textContent = newVal;
+        statNums[index].dataset.count = newVal;
       }
     };
 
