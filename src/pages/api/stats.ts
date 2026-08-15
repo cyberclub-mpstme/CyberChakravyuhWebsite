@@ -1,40 +1,37 @@
 import type { APIRoute } from 'astro';
 
-// Using native fetch to Upstash/KV REST API avoids ALL bundler/dependency crash issues on Vercel
-function getRedisConfig() {
-  const url = import.meta.env.UPSTASH_REDIS_REST_URL || import.meta.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = import.meta.env.UPSTASH_REDIS_REST_TOKEN || import.meta.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-  
-  if (!url || !token) return null;
-  return { url, token };
-}
+let redisInstance: any = null;
 
-async function redisFetch(config: { url: string; token: string }, command: string, ...args: any[]) {
-  const body = JSON.stringify([command, ...args]);
-  const res = await fetch(config.url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${config.token}`,
-      'Content-Type': 'application/json',
-    },
-    body,
-  });
-  if (!res.ok) throw new Error(`Upstash error: ${res.statusText}`);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.result;
+async function getRedis() {
+  if (redisInstance) return redisInstance;
+  
+  const redisUrl = import.meta.env.REDIS_URL || process.env.REDIS_URL;
+  if (!redisUrl) return null;
+
+  try {
+    const ioredis = await import('ioredis');
+    const Redis = ioredis.default || (ioredis as any).Redis;
+    redisInstance = new Redis(redisUrl);
+    return redisInstance;
+  } catch (e) {
+    console.error('Failed to initialize ioredis:', e);
+    return null;
+  }
 }
 
 export const GET: APIRoute = async () => {
-  const config = getRedisConfig();
-  if (!config) return new Response(JSON.stringify({ error: 'Redis REST not configured' }), { status: 500 });
+  const redis = await getRedis();
+  if (!redis) {
+    return new Response(JSON.stringify({ error: 'Redis not configured' }), { status: 500 });
+  }
 
   try {
-    const keys = await redisFetch(config, 'KEYS', 'zd-*');
+    // Get all keys starting with 'zd-*'
+    const keys = await redis.keys('zd-*');
     const stats: Record<string, string | null> = {};
     
-    if (keys && keys.length > 0) {
-      const values = await redisFetch(config, 'MGET', ...keys);
+    if (keys.length > 0) {
+      const values = await redis.mget(keys);
       keys.forEach((key: string, i: number) => {
         stats[key] = values[i];
       });
@@ -50,8 +47,10 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const config = getRedisConfig();
-  if (!config) return new Response(JSON.stringify({ error: 'Redis REST not configured' }), { status: 500 });
+  const redis = await getRedis();
+  if (!redis) {
+    return new Response(JSON.stringify({ error: 'Redis not configured' }), { status: 500 });
+  }
 
   try {
     const { type, edition } = await request.json();
@@ -61,7 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const key = `zd-${type}-${edition}`;
-    const newValue = await redisFetch(config, 'INCR', key);
+    const newValue = await redis.incr(key);
 
     return new Response(JSON.stringify({ value: newValue }), {
       status: 200,
