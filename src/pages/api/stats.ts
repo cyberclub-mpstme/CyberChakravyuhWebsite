@@ -1,14 +1,26 @@
 import type { APIRoute } from 'astro';
-import Redis from 'ioredis';
 
-const redisUrl = import.meta.env.REDIS_URL || process.env.REDIS_URL;
-let redis: Redis | null = null;
+let redisInstance: any = null;
 
-if (redisUrl) {
-  redis = new Redis(redisUrl);
+async function getRedis() {
+  if (redisInstance) return redisInstance;
+  
+  const redisUrl = import.meta.env.REDIS_URL || process.env.REDIS_URL;
+  if (!redisUrl) return null;
+
+  try {
+    const ioredis = await import('ioredis');
+    const Redis = ioredis.default || (ioredis as any).Redis;
+    redisInstance = new Redis(redisUrl);
+    return redisInstance;
+  } catch (e) {
+    console.error('Failed to initialize ioredis:', e);
+    return null;
+  }
 }
 
 export const GET: APIRoute = async () => {
+  const redis = await getRedis();
   if (!redis) {
     return new Response(JSON.stringify({ error: 'Redis not configured' }), { status: 500 });
   }
@@ -20,7 +32,7 @@ export const GET: APIRoute = async () => {
     
     if (keys.length > 0) {
       const values = await redis.mget(keys);
-      keys.forEach((key, i) => {
+      keys.forEach((key: string, i: number) => {
         stats[key] = values[i];
       });
     }
@@ -35,6 +47,7 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  const redis = await getRedis();
   if (!redis) {
     return new Response(JSON.stringify({ error: 'Redis not configured' }), { status: 500 });
   }
