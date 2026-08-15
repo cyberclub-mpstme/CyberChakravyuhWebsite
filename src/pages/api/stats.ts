@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { createClient } from 'redis';
 
 let redisInstance: any = null;
 
@@ -9,12 +10,12 @@ async function getRedis() {
   if (!redisUrl) return null;
 
   try {
-    const ioredis = await import('ioredis');
-    const Redis = ioredis.default || (ioredis as any).Redis;
-    redisInstance = new Redis(redisUrl);
+    redisInstance = createClient({ url: redisUrl });
+    redisInstance.on('error', (err: any) => console.error('Redis Client Error', err));
+    await redisInstance.connect();
     return redisInstance;
   } catch (e) {
-    console.error('Failed to initialize ioredis:', e);
+    console.error('Failed to initialize redis:', e);
     return null;
   }
 }
@@ -26,12 +27,11 @@ export const GET: APIRoute = async () => {
   }
 
   try {
-    // Get all keys starting with 'zd-*'
     const keys = await redis.keys('zd-*');
     const stats: Record<string, string | null> = {};
     
     if (keys.length > 0) {
-      const values = await redis.mget(keys);
+      const values = await redis.mGet(keys);
       keys.forEach((key: string, i: number) => {
         stats[key] = values[i];
       });

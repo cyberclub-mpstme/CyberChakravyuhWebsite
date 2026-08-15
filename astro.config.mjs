@@ -11,9 +11,4 @@ export default defineConfig({
   integrations: [react(), markdoc(), keystatic()],
   output: 'server',
   adapter: vercel(),
-  vite: {
-    ssr: {
-      external: ['ioredis']
-    }
-  }
 });
