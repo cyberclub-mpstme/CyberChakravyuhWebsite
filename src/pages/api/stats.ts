@@ -5,7 +5,8 @@ let redisInstance: any = null;
 async function getRedis() {
   if (redisInstance) return redisInstance;
   
-  const redisUrl = import.meta.env.REDIS_URL || process.env.REDIS_URL;
+  const envVars = typeof process !== 'undefined' ? process.env : {} as any;
+  const redisUrl = import.meta.env.REDIS_URL || envVars['REDIS_URL'];
   if (!redisUrl) return null;
 
   try {
